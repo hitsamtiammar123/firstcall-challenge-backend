@@ -1,6 +1,9 @@
 const express = require('express')
 const fs = require('fs')
+const cors = require('cors')
+const bodyParser = require('body-parser')
 const app = express()
+
 const port = process.env.PORT || 3001
 let DATA = [];
 
@@ -31,6 +34,8 @@ function writeData(){
 }
 
 app.use(express.json())
+app.use(cors())
+app.use(bodyParser.json())
 
 app.use((req, res, next) => {
   console.log('go in middleware')
@@ -87,6 +92,24 @@ app.put('/', (req,res) => {
       return res.status(200).json({ status: 200, message: 'Data has been updated' })
     }else{
       return res.status(404).json({ status: 404, message: 'Data not found' })
+    }
+  }catch(e){
+    return next(e)
+  }
+})
+
+app.delete('/', (req,res) => {
+  try{
+    const body = req.body
+
+    const id = body.id;
+
+    if(DATA.findIndex((item) => item.id === id) !== -1){
+      DATA = DATA.filter((item) => item.id !== id)
+      writeData()
+      return res.json({ status: 200, message: 'Data has been deleted'  })
+    }else{
+      return res.status(404).json({ status: 404, message: 'Data not found'  })
     }
   }catch(e){
     return next(e)
